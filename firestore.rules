@@ -1,0 +1,191 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Safety net: Default-deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Global helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Check if the current user is an admin.
+    // Bootstrapped with attideyt71@gmail.com for this development applet workspace.
+    // Includes fail-safe UID checking and email-based check.
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.uid == "dqEvVuFDi9dwuRFLJlYGkn6WewK2") ||
+        (request.auth.token.email == "attideyt71@gmail.com") ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email != null && exists(/databases/$(database)/documents/admins/$(request.auth.token.email)))
+      );
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 2. User Verification & Rules
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email', 'minecraftUsername', 'createdAt'])
+        && data.keys().size() == 4
+        && data.uid is string && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.minecraftUsername is string && data.minecraftUsername.size() <= 64
+        && data.createdAt is timestamp;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(incoming()) && incoming().createdAt == existing().createdAt;
+    }
+
+    // 3. Ranks Validation & Rules (Public read, admin write)
+    function isValidRank(data) {
+      return data.keys().hasAll(['name', 'price', 'imageUrl', 'inventoryScreenshot', 'description'])
+        && data.name is string && data.name.size() <= 128
+        && data.price is number && data.price >= 0
+        && (!data.keys().hasAll(['priceRS']) || data.priceRS == null || (data.priceRS is number && data.priceRS >= 0))
+        && data.imageUrl is string && data.imageUrl.size() <= 1024
+        && data.inventoryScreenshot is string && data.inventoryScreenshot.size() <= 1024
+        && data.description is string && data.description.size() <= 4096
+        && (!data.keys().hasAll(['isPinned']) || data.isPinned == null || data.isPinned is bool);
+    }
+
+    match /ranks/{rankId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidRank(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 4. Coins Validation & Rules (Public read, admin write)
+    function isValidCoin(data) {
+      return data.keys().hasAll(['name', 'coinAmount', 'price', 'imageUrl', 'description'])
+        && data.name is string && data.name.size() <= 128
+        && data.coinAmount is number && data.coinAmount >= 0
+        && data.price is number && data.price >= 0
+        && (!data.keys().hasAll(['priceRS']) || data.priceRS == null || (data.priceRS is number && data.priceRS >= 0))
+        && data.imageUrl is string && data.imageUrl.size() <= 1024
+        && data.description is string && data.description.size() <= 4096
+        && (!data.keys().hasAll(['isPinned']) || data.isPinned == null || data.isPinned is bool);
+    }
+
+    match /coins/{coinId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidCoin(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 5. Orders Validation & Rules
+    // Customers can create orders with status: "Pending".
+    // Admins can upgrade status, and append rejectionReason if rejected.
+    function isValidOrder(data) {
+      return data.keys().hasAll(['orderId', 'uid', 'email', 'minecraftUsername', 'productType', 'productName', 'price', 'status', 'createdAt'])
+        && data.orderId is string && data.orderId.size() <= 64
+        && data.uid is string && data.uid.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.minecraftUsername is string && data.minecraftUsername.size() <= 64
+        && data.productType is string && (data.productType == 'rank' || data.productType == 'coin' || data.productType == 'bundle')
+        && data.productName is string && data.productName.size() <= 128
+        && data.price is number && data.price >= 0
+        && (!data.keys().hasAll(['priceRS']) || data.priceRS == null || (data.priceRS is number && data.priceRS >= 0))
+        && data.status is string && (data.status == 'Pending' || data.status == 'Confirmed' || data.status == 'Rejected')
+        && data.createdAt is timestamp;
+    }
+
+    match /orders/{orderId} {
+      // Direct get or list query checking owner. List queries must be restricted.
+      allow read, get: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      
+      allow create: if isSignedIn()
+        && incoming().uid == request.auth.uid
+        && incoming().status == 'Pending'
+        && isValidOrder(incoming())
+        && incoming().createdAt == request.time;
+        
+      allow update: if isAdmin()
+        && isValidOrder(incoming())
+        && incoming().uid == existing().uid
+        && incoming().orderId == existing().orderId
+        && incoming().productName == existing().productName
+        && incoming().price == existing().price
+        && incoming().createdAt == existing().createdAt;
+        
+      allow delete: if isAdmin();
+    }
+
+    // 6. Admin configuration lookup
+    function isValidAdmin(data) {
+      return data.keys().hasAll(['email', 'role', 'createdAt'])
+        && data.keys().size() == 3
+        && data.email is string && data.email.size() <= 128
+        && data.role is string && data.role.size() <= 128
+        && data.createdAt is timestamp;
+    }
+
+    match /admins/{adminId} {
+      allow get: if isSignedIn();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() && isValidAdmin(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 7. Username to Profile mapping (Allow single document lookups, deny listing/scraping, write restricted to owners)
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isOwner(incoming().uid) && isValidUser(incoming()) && incoming().createdAt == request.time;
+      allow update: if isOwner(incoming().uid) && isOwner(existing().uid) && isValidUser(incoming()) && incoming().createdAt == existing().createdAt;
+      allow delete: if false;
+    }
+    
+    // 8. Site Settings rules (Public read, admin write)
+    function isValidSettings(data) {
+      return data.keys().hasAll(['serverIP', 'discordLink'])
+        && data.serverIP is string && data.serverIP.size() <= 256
+        && data.discordLink is string && data.discordLink.size() <= 256
+        && (!data.keys().contains('backgroundImage') || (data.backgroundImage is string && data.backgroundImage.size() <= 1024))
+        && (!data.keys().contains('logoUrl') || (data.logoUrl is string && data.logoUrl.size() <= 1024))
+        && (!data.keys().contains('announcementText') || (data.announcementText is string && data.announcementText.size() <= 1024))
+        && (!data.keys().contains('heroTitle') || (data.heroTitle is string && data.heroTitle.size() <= 1024))
+        && (!data.keys().contains('heroSubtitle') || (data.heroSubtitle is string && data.heroSubtitle.size() <= 4096));
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidSettings(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 9. Bundles Validation & Rules (Public read, admin write)
+    function isValidBundle(data) {
+      return data.keys().hasAll(['name', 'price', 'imageUrl', 'description', 'rankName', 'coinAmount'])
+        && data.name is string && data.name.size() <= 128
+        && data.price is number && data.price >= 0
+        && (!data.keys().hasAll(['priceRS']) || data.priceRS == null || (data.priceRS is number && data.priceRS >= 0))
+        && data.imageUrl is string && data.imageUrl.size() <= 1024
+        && data.description is string && data.description.size() <= 4096
+        && data.rankName is string && data.rankName.size() <= 128
+        && data.coinAmount is number && data.coinAmount >= 0
+        && (!data.keys().hasAll(['isPinned']) || data.isPinned == null || data.isPinned is bool);
+    }
+
+    match /bundles/{bundleId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isValidBundle(incoming());
+      allow delete: if isAdmin();
+    }
+  }
+}

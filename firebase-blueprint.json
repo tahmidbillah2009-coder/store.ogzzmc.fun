@@ -1,0 +1,300 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Minecraft store user profile registration information",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique user ID from Firebase Auth"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's registered email address"
+        },
+        "minecraftUsername": {
+          "type": "string",
+          "description": "The custom Minecraft in-game name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when this user registered"
+        }
+      },
+      "required": ["uid", "email", "minecraftUsername", "createdAt"]
+    },
+    "Rank": {
+      "title": "Rank",
+      "description": "A purchasable premium rank in OGzz MC",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the server rank"
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the rank"
+        },
+        "priceRS": {
+          "type": "number",
+          "description": "Optional manual override price in Indian Rupees (RS)"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Visual rank badge or emblem URL"
+        },
+        "inventoryScreenshot": {
+          "type": "string",
+          "description": "Screenshot showing in-game rank perks or visual reference"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed bullet points of the rank's benefits"
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Flag to display this item as pinned in the featured section on the home page"
+        }
+      },
+      "required": ["name", "price", "imageUrl", "inventoryScreenshot", "description"]
+    },
+    "Coin": {
+      "title": "Coin Pack",
+      "description": "A purchasable in-game coins package",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The title of the coin bundle"
+        },
+        "coinAmount": {
+          "type": "number",
+          "description": "Amount of virtual server coins included"
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the coin pack"
+        },
+        "priceRS": {
+          "type": "number",
+          "description": "Optional manual override price in Indian Rupees (RS)"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Coins icon image reference"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief highlight list of the pack contents"
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Flag to display this item as pinned in the featured section on the home page"
+        }
+      },
+      "required": ["name", "coinAmount", "price", "imageUrl", "description"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "An order logged by the user for rank or coins purchases",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "description": "A unique ticket ID formatted like OGZZ-XXXXXX"
+        },
+        "uid": {
+          "type": "string",
+          "description": "User ID of the placing customer"
+        },
+        "email": {
+          "type": "string",
+          "description": "The email of the customer"
+        },
+        "minecraftUsername": {
+          "type": "string",
+          "description": "The Minecraft in-game username of the consumer receiving the items"
+        },
+        "productType": {
+          "type": "string",
+          "enum": ["rank", "coin", "bundle"],
+          "description": "The item category type"
+        },
+        "productName": {
+          "type": "string",
+          "description": "The precise title of the item purchased"
+        },
+        "price": {
+          "type": "number",
+          "description": "The cost paid for the receipt"
+        },
+        "priceRS": {
+          "type": "number",
+          "description": "Optional manual override price in Indian Rupees (RS)"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Pending", "Confirmed", "Rejected"],
+          "description": "The verification status of the purchase"
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "Explains why the purchase request was denied"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The server completion status date"
+        }
+      },
+      "required": ["orderId", "uid", "email", "minecraftUsername", "productType", "productName", "price", "status", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Privileged staff account identifier to log into dashboard panel",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Admin email coordinates"
+        },
+        "role": {
+          "type": "string",
+          "description": "Staff role description such as Admin or Owner"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when added as moderator"
+        }
+      },
+      "required": ["email", "role", "createdAt"]
+    },
+    "UsernameMapping": {
+      "title": "Username Mapping",
+      "description": "Minecraft character name to user profile mapping index",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique user ID from Firebase Auth"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's registered email address"
+        },
+        "minecraftUsername": {
+          "type": "string",
+          "description": "The custom Minecraft in-game name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when mapping was established"
+        }
+      },
+      "required": ["uid", "email", "minecraftUsername", "createdAt"]
+    },
+    "SiteSettings": {
+      "title": "Site Settings",
+      "description": "Global custom configurations for website Home IP, Discord server links, Hero Background image link, and custom logo link",
+      "type": "object",
+      "properties": {
+        "serverIP": {
+          "type": "string",
+          "description": "Minecraft server IP address shown on the website"
+        },
+        "discordLink": {
+          "type": "string",
+          "description": "Discord guild link shown on the website"
+        },
+        "backgroundImage": {
+          "type": "string",
+          "description": "Custom HTTPS URL of background image displayed on the main hero banner"
+        },
+        "logoUrl": {
+          "type": "string",
+          "description": "Custom HTTPS URL of the website logo shown in the Navbar and Loader"
+        }
+      },
+      "required": ["serverIP", "discordLink"]
+    },
+    "Bundle": {
+      "title": "Bundle Combo Pack",
+      "description": "A purchasable combo pack containing lifetime rank privileges and virtual server coins",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The title of the bundle package"
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the bundle package"
+        },
+        "priceRS": {
+          "type": "number",
+          "description": "Optional manual override price in Indian Rupees (RS)"
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "The custom image URL representing the combo offer"
+        },
+        "description": {
+          "type": "string",
+          "description": "Brief tagline or copy description of the combo perks"
+        },
+        "rankName": {
+          "type": "string",
+          "description": "Name of the target rank being unlocked"
+        },
+        "coinAmount": {
+          "type": "number",
+          "description": "Amount of virtual server coins included in the combo pack"
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Flag to display this item as pinned in the featured section on the home page"
+        }
+      },
+      "required": ["name", "price", "imageUrl", "description", "rankName", "coinAmount"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "Users tracking profiles matching registered IDs"
+    },
+    "ranks/{rankId}": {
+      "schema": "Rank",
+      "description": "The store configurations for ranks item offers"
+    },
+    "coins/{coinId}": {
+      "schema": "Coin",
+      "description": "The store configurations for coins virtual balance packs"
+    },
+    "bundles/{bundleId}": {
+      "schema": "Bundle",
+      "description": "The store configurations for combo rank and coin purchase bundles"
+    },
+    "orders/{orderId}": {
+      "schema": "Order",
+      "description": "All receipts generated by users awaiting Discord verification"
+    },
+    "admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Security lookup mapping uid to their staff role permissions"
+    },
+    "usernames/{username}": {
+      "schema": "UsernameMapping",
+      "description": "Index mapping lowercased Minecraft username to email and UID for secure lookup"
+    },
+    "settings/{settingId}": {
+      "schema": "SiteSettings",
+      "description": "Customizable homepage IP and Discord link configurations saved by administrators"
+    }
+  }
+}
