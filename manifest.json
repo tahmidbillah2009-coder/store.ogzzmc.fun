@@ -1,0 +1,17 @@
+{
+  "name": "OGzz MC Store",
+  "short_name": "OGzz MC",
+  "description": "Minecraft Store for OGzz MC with ranks, coins, bundles, and support tools for a Minecraft Survival Server and Minecraft SMP.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
