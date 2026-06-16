@@ -258,13 +258,6 @@ export default function AdminDashboard() {
     };
   }, [user, isAdmin, settings.catalogInitialized]);
 
-  // Automatically trigger database catalog seeding if the admin view loads and database is uninitialized
-  useEffect(() => {
-    if (user && isAdmin && !settings.catalogInitialized && !isSeeding && !loadingData) {
-      handleSeedDefaultProducts();
-    }
-  }, [user, isAdmin, settings.catalogInitialized, isSeeding, loadingData]);
-
   // Auth gate checks
   if (authLoading) {
     return (

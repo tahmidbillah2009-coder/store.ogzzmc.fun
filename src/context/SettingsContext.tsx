@@ -55,6 +55,7 @@ const DEFAULT_SETTINGS: SiteSettings = {
 
 function normalizeSettings(settings: SiteSettings): SiteSettings {
   return {
+    ...DEFAULT_SETTINGS,
     ...settings,
     heroTitle:
       !settings.heroTitle ||
@@ -108,9 +109,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         heroTitle: newSettings.heroTitle ? newSettings.heroTitle.trim() : 'OGZZ MC STORE',
         heroSubtitle: newSettings.heroSubtitle ? newSettings.heroSubtitle.trim() : 'Upgrade your Minecraft multiplayer experience! Buy elite VIP privileges, customizable particle effects, and premium virtual gold pouches instantly.',
         systemLocked: !!newSettings.systemLocked,
-        catalogInitialized: newSettings.catalogInitialized !== undefined ? !!newSettings.catalogInitialized : false,
+        // Preserve the catalog state when the settings form does not explicitly change it.
+        catalogInitialized: newSettings.catalogInitialized !== undefined
+          ? !!newSettings.catalogInitialized
+          : !!settings.catalogInitialized,
         termsAndConditions: newSettings.termsAndConditions ? newSettings.termsAndConditions.trim() : DEFAULT_TERMS,
-      });
+      }, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }
