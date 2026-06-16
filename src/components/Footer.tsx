@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { Gamepad2, Heart, HelpCircle, ShieldCheck } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
@@ -54,16 +53,16 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link to="/" className="text-gray-400 hover:text-white transition-colors">Home</Link>
+                <a href="/" className="text-gray-400 hover:text-white transition-colors">Home</a>
               </li>
               <li>
-                <Link to="/ranks" className="text-gray-400 hover:text-white transition-colors">VIP Ranks Store</Link>
+                <a href="/ranks" className="text-gray-400 hover:text-white transition-colors">VIP Ranks Store</a>
               </li>
               <li>
-                <Link to="/coins" className="text-gray-400 hover:text-white transition-colors">Virtual Coins</Link>
+                <a href="/coins" className="text-gray-400 hover:text-white transition-colors">Virtual Coins</a>
               </li>
               <li>
-                <Link to="/order-tracker" className="text-gray-400 hover:text-white transition-colors">Track Order ID</Link>
+                <a href="/order-tracker" className="text-gray-400 hover:text-white transition-colors">Track Order ID</a>
               </li>
             </ul>
           </div>
@@ -117,7 +116,7 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row items-center justify-between text-zinc-500 text-xs">
             <p>© 2026 OGzz MC Store. All rights reserved.</p>
             <div className="flex space-x-4 mt-2 sm:mt-0">
-              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+              <a href="/terms" className="hover:text-white transition-colors">Terms of Service</a>
               <span className="text-zinc-800">|</span>
               <span className="cursor-default">Privacy Policy</span>
             </div>

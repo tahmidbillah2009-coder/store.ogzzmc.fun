@@ -36,4 +36,11 @@
     <priority>0.8</priority>
   </url>
 
+  <url>
+    <loc>https://ogzzmc.fun/terms</loc>
+    <lastmod>2026-06-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
 </urlset>

@@ -6,13 +6,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, '..');
 const distDir = path.join(projectRoot, 'dist');
-const sourceIndexPath = path.join(distDir, 'index.html');
+const sourceAppPath = path.join(distDir, 'app.html');
 
 const staticRoutes = [
-  'ranks',
-  'coins',
-  'bundles',
-  'order-tracker',
   'login',
   'register',
   'dashboard',
@@ -28,8 +24,8 @@ async function ensureFileExists(filePath) {
 }
 
 async function generateRoutePages() {
-  await ensureFileExists(sourceIndexPath);
-  const html = await readFile(sourceIndexPath, 'utf8');
+  await ensureFileExists(sourceAppPath);
+  const html = await readFile(sourceAppPath, 'utf8');
 
   for (const route of staticRoutes) {
     const routeDir = path.join(distDir, route);
@@ -40,7 +36,7 @@ async function generateRoutePages() {
   }
 
   // Keep a copy at 404 so unknown static misses still boot the SPA on some hosts.
-  await copyFile(sourceIndexPath, path.join(distDir, '404.html'));
+  await copyFile(sourceAppPath, path.join(distDir, '404.html'));
 }
 
 generateRoutePages().catch((error) => {

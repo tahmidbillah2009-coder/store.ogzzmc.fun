@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { Sparkles, Copy, Check, Terminal, ExternalLink } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
@@ -159,20 +158,20 @@ export default function HomeView() {
 
           {/* CTA Button Actions */}
           <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 sm:gap-5 pt-4 max-w-sm sm:max-w-none mx-auto">
-            <Link
+            <a
               id="home-view-ranks-cta"
-              to="/ranks"
+              href="/ranks"
               className="px-8 py-4 sm:px-10 sm:py-5 bg-[#B30000] hover:bg-[#D60000] text-white font-black rounded-xl font-mono text-base tracking-wider uppercase transition-all shadow-[0_0_30px_rgba(179,0,0,0.6)] hover:shadow-[0_0_40px_rgba(214,0,0,0.9)] border border-[#B30000] text-center shine-overlay"
             >
               Explore VIP Ranks
-            </Link>
-            <Link
+            </a>
+            <a
               id="home-view-coins-cta"
-              to="/coins"
+              href="/coins"
               className="px-8 py-4 sm:px-10 sm:py-5 bg-zinc-950 hover:bg-zinc-900 text-gray-250 hover:text-white font-black rounded-xl font-mono text-base tracking-wider uppercase transition-all border border-zinc-800 hover:border-zinc-700 shadow-md text-center shine-overlay"
             >
               Shop Coins
-            </Link>
+            </a>
           </div>
         </section>
       </div>
@@ -225,12 +224,12 @@ export default function HomeView() {
                         <span className="text-base font-mono text-[#FF3E3E] font-black glow-text-red">
                           {formatPrice(item.price, item.priceRS)}
                         </span>
-                        <Link
-                          to={linkTo}
+                        <a
+                          href={linkTo}
                           className="px-6 py-2.5 bg-[#B30000]/10 hover:bg-[#B30000] border border-[#B30000]/40 rounded-lg text-white text-xs sm:text-sm font-mono uppercase font-bold tracking-wider transition-all shadow-[0_0_10px_rgba(179,0,0,0.1)] hover:shadow-[0_0_15px_rgba(179,0,0,0.4)]"
                         >
                           {buttonText}
-                        </Link>
+                        </a>
                       </div>
                     </div>
                   </div>

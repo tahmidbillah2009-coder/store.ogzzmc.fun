@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { ShieldCheck, ArrowLeft, FileText, Scale } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 export default function TermsConditions() {
   const { settings } = useSettings();
@@ -96,13 +95,13 @@ export default function TermsConditions() {
       
       {/* Decorative Top breadcrumb links */}
       <div className="flex items-center">
-        <Link 
-          to="/" 
+        <a
+          href="/"
           className="inline-flex items-center gap-2 text-zinc-500 hover:text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5 text-[#B30000]" />
           Back to storefront
-        </Link>
+        </a>
       </div>
 
       {/* Main visual header */}

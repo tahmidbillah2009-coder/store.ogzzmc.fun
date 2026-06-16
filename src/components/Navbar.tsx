@@ -1,22 +1,21 @@
 import { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Gamepad2, Search, Coins, ShieldCheck, User, LogOut, LogIn, UserPlus, Star } from 'lucide-react';
+import { Menu, X, Gamepad2, ShieldCheck, User, LogOut, LogIn, UserPlus } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSettings } from '../context/SettingsContext';
+import { normalizePathname } from '../site/seo';
 import toast from 'react-hot-toast';
 
 export default function Navbar() {
   const { user, profile, isAdmin, logout } = useAuth();
   const { settings } = useSettings();
   const [isOpen, setIsOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const currentPath = normalizePathname(window.location.pathname);
 
   const handleLogout = async () => {
     try {
       await logout();
       toast.success("Successfully logged out!");
-      navigate('/');
+      window.location.assign('/');
       setIsOpen(false);
     } catch (err: any) {
       toast.error(err.message || "Failed to log out");
@@ -31,7 +30,7 @@ export default function Navbar() {
     { name: "Order Tracker", path: "/order-tracker" },
   ];
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => normalizePathname(path) === currentPath;
 
   return (
     <nav className="sticky top-0 z-50 bg-transparent border-b border-transparent backdrop-blur-sm transition-colors duration-300">
@@ -40,7 +39,7 @@ export default function Navbar() {
           
           {/* Logo Section */}
           <div className="flex-shrink-0 flex items-center">
-            <Link id="nav-logo" to="/" className="flex items-center gap-4 group">
+            <a id="nav-logo" href="/" className="flex items-center gap-4 group">
               <div className={`w-12 h-12 flex items-center justify-center border border-[#B30000]/50 rounded-xl transition-all shadow-[0_0_15px_rgba(179,0,0,0.3)] overflow-hidden ${settings?.logoUrl ? 'p-0 bg-transparent' : 'p-2.5 bg-[#B30000]/10 group-hover:bg-[#B30000]/20'}`}>
                 {settings?.logoUrl ? (
                   <img
@@ -65,16 +64,16 @@ export default function Navbar() {
                   MC Store
                 </span>
               </div>
-            </Link>
+            </a>
           </div>
 
           {/* Desktop Nav Links */}
           <div className="hidden md:flex items-center space-x-2">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.name}
                 id={`nav-${link.name.toLowerCase().replace(' ', '-')}`}
-                to={link.path}
+                href={link.path}
                 className={`px-5 py-2.5 rounded-lg text-base font-semibold transition-all duration-200 ${
                   isActive(link.path)
                     ? 'text-white bg-[#B30000]/20 border border-[#B30000]/40 shadow-[0_0_8px_rgba(179,0,0,0.2)]'
@@ -82,28 +81,28 @@ export default function Navbar() {
                 }`}
               >
                 {link.name}
-              </Link>
+              </a>
             ))}
           </div>
 
           {/* User Session / CTA - Desktop */}
           <div className="hidden md:flex items-center space-x-4">
             {isAdmin && (
-              <Link
+              <a
                 id="nav-admin"
-                to="/admin"
+                href="/admin"
                 className="flex items-center gap-2 px-4 py-2 bg-yellow-600/10 hover:bg-yellow-600/20 text-yellow-400 border border-yellow-500/30 rounded-lg text-sm font-mono transition-all uppercase font-bold"
               >
                 <ShieldCheck className="w-4 h-4" />
                 Staff Panel
-              </Link>
+              </a>
             )}
 
             {user ? (
               <div className="flex items-center space-x-3.5">
-                <Link
+                <a
                   id="nav-user-dashboard"
-                  to="/dashboard"
+                  href="/dashboard"
                   className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-base font-bold border transition-all ${
                     isActive('/dashboard')
                       ? 'border-[#B30000] text-white bg-[#B30000]/10'
@@ -112,7 +111,7 @@ export default function Navbar() {
                 >
                   <User className="h-5 w-5 text-[#B30000]" />
                   <span className="font-mono text-white font-bold">{profile?.minecraftUsername || 'Player'}</span>
-                </Link>
+                </a>
                 <button
                   id="nav-logout-btn"
                   onClick={handleLogout}
@@ -124,22 +123,22 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <Link
+                <a
                   id="nav-login"
-                  to="/login"
+                  href="/login"
                   className="flex items-center gap-1.5 px-5 py-2.5 text-base font-bold text-gray-300 hover:text-white bg-transparent transition-all"
                 >
                   <LogIn className="h-5 w-5" />
                   Sign In
-                </Link>
-                <Link
+                </a>
+                <a
                   id="nav-register"
-                  to="/register"
+                  href="/register"
                   className="flex items-center gap-2 px-5 py-2.5 text-base font-bold text-white bg-[#B30000] hover:bg-[#D60000] rounded-lg transition-all shadow-[0_0_15px_rgba(179,0,0,0.4)] hover:shadow-[0_0_20px_rgba(214,0,0,0.6)] border border-[#B30000]"
                 >
                   <UserPlus className="h-5 w-5" />
                   Register
-                </Link>
+                </a>
               </div>
             )}
           </div>
@@ -162,9 +161,9 @@ export default function Navbar() {
         <div className="md:hidden bg-[#0C0C0C] border-t border-[#B30000]/20 px-4 pt-2 pb-6 space-y-3 shadow-xl">
           <div className="space-y-1">
             {navLinks.map((link) => (
-              <Link
+              <a
                 key={link.name}
-                to={link.path}
+                href={link.path}
                 onClick={() => setIsOpen(false)}
                 className={`block px-4 py-3 rounded-md text-base font-medium ${
                   isActive(link.path)
@@ -173,32 +172,32 @@ export default function Navbar() {
                 }`}
               >
                 {link.name}
-              </Link>
+              </a>
             ))}
           </div>
 
           <div className="pt-4 border-t border-zinc-800 space-y-2">
             {isAdmin && (
-              <Link
-                to="/admin"
+              <a
+                href="/admin"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center justify-center gap-1.5 w-full py-2.5 bg-yellow-600/10 text-yellow-400 border border-yellow-500/20 rounded-md text-sm font-mono uppercase"
               >
                 <ShieldCheck className="w-4 h-4" />
                 Staff Panel
-              </Link>
+              </a>
             )}
 
             {user ? (
               <div className="space-y-2">
-                <Link
-                  to="/dashboard"
+                <a
+                  href="/dashboard"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-zinc-900 border border-[#B30000]/30 rounded-md text-white text-sm"
                 >
                   <User className="h-4 w-4 text-[#B30000]" />
                   <span>{profile?.minecraftUsername || 'My Profile'}</span>
-                </Link>
+                </a>
                 <button
                   onClick={handleLogout}
                   className="flex items-center justify-center gap-2 w-full py-2.5 bg-[#B30000]/20 hover:bg-[#B30000]/30 border border-[#B30000]/40 rounded-md text-[#FF3E3E] text-sm"
@@ -209,22 +208,22 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2">
-                <Link
-                  to="/login"
+                <a
+                  href="/login"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-center gap-1 py-2.5 bg-zinc-900 text-gray-300 hover:text-white border border-zinc-800 rounded-md text-sm"
                 >
                   <LogIn className="h-4 w-4" />
                   Sign In
-                </Link>
-                <Link
-                  to="/register"
+                </a>
+                <a
+                  href="/register"
                   onClick={() => setIsOpen(false)}
                   className="flex items-center justify-center gap-1 py-2.5 bg-[#B30000] text-white rounded-md text-sm font-medium shadow-md"
                 >
                   <UserPlus className="h-4 w-4" />
                   Register
-                </Link>
+                </a>
               </div>
             )}
           </div>
