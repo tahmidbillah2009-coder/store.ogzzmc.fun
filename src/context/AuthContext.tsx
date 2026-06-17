@@ -3,6 +3,7 @@ import {
   onAuthStateChanged, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
+  sendPasswordResetEmail,
   signOut, 
   User as FirebaseUser 
 } from 'firebase/auth';
@@ -27,6 +28,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   login: (loginValue: string, passwordValue: string) => Promise<void>;
   registerUser: (emailValue: string, usernameValue: string, passwordValue: string) => Promise<void>;
+  resetPassword: (emailValue: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -226,6 +228,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Send Firebase's built-in password reset email for email/password accounts.
+  const resetPassword = async (emailValue: string) => {
+    const sanitizedEmail = emailValue.trim();
+
+    try {
+      await sendPasswordResetEmail(auth, sanitizedEmail, {
+        // Return players to the login screen after completing the reset flow.
+        url: `${window.location.origin}/login`,
+      });
+    } catch (err: any) {
+      switch (err?.code) {
+        case 'auth/invalid-email':
+          throw new Error('Please enter a valid email address.');
+        case 'auth/user-not-found':
+          throw new Error('No account was found with that email address.');
+        case 'auth/network-request-failed':
+          throw new Error('Network error. Please check your connection and try again.');
+        case 'auth/too-many-requests':
+          throw new Error('Too many reset attempts. Please wait a moment and try again.');
+        case 'auth/operation-not-allowed':
+          throw new Error("Email/Password Authentication is not enabled in your Firebase Console. Please go to Authentication -> Sign-in method and enable 'Email/Password' in the Firebase Console.");
+        default:
+          throw new Error(err?.message || 'Firebase could not send the password reset email. Please try again.');
+      }
+    }
+  };
+
   // Sign out user handler
   const logout = async () => {
     setLoading(true);
@@ -243,6 +272,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     login,
     registerUser,
+    resetPassword,
     logout
   };
 

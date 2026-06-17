@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Gamepad, Lock, UserPlus, Loader2, ShieldCheck, CheckSquare } from 'lucide-react';
+import { Mail, Gamepad, Lock, UserPlus, Loader2, ShieldCheck, CheckSquare, Eye, EyeOff } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Register() {
@@ -10,6 +10,8 @@ export default function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { registerUser } = useAuth();
   const navigate = useNavigate();
 
@@ -120,14 +122,25 @@ export default function Register() {
                 Password
               </label>
               <div className="flex bg-zinc-950 border border-zinc-900 focus-within:border-[#B30000] rounded transition-all">
+                <span className="p-3 bg-zinc-900/30 text-zinc-500 border-r border-zinc-900 flex items-center">
+                  <Lock className="w-4 h-4" />
+                </span>
                 <input
                   id="register-password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="flex-1 bg-transparent border-none text-white text-sm p-2.5 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((current) => !current)}
+                  className="px-3 text-zinc-500 transition-colors hover:text-white"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
@@ -136,14 +149,25 @@ export default function Register() {
                 Confirm Code
               </label>
               <div className="flex bg-zinc-950 border border-zinc-900 focus-within:border-[#B30000] rounded transition-all">
+                <span className="p-3 bg-zinc-900/30 text-zinc-500 border-r border-zinc-900 flex items-center">
+                  <Lock className="w-4 h-4" />
+                </span>
                 <input
                   id="register-confirm-password"
-                  type="password"
+                  type={showConfirmPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="flex-1 bg-transparent border-none text-white text-sm p-2.5 focus:outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((current) => !current)}
+                  className="px-3 text-zinc-500 transition-colors hover:text-white"
+                  aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                >
+                  {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
           </div>

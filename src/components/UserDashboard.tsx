@@ -1,28 +1,34 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase/firebase';
 import { useAuth } from '../context/AuthContext';
 import { OrderItem } from '../types';
 import { formatPrice } from '../utils/price';
 import { useNavigate, Link } from 'react-router-dom';
-import { 
-  ShoppingBag, Clock, CheckCircle, XCircle, 
-  User, ClipboardList, Loader2, ArrowRight, Compass 
+import {
+  ShoppingBag, Clock, CheckCircle, XCircle,
+  User, ClipboardList, Loader2
 } from 'lucide-react';
-import toast from 'react-hot-toast';
 
 export default function UserDashboard() {
-  const { user, profile } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Escort unauthenticated users out safely
-    if (!user) {
-      navigate('/login');
+    // Wait until Firebase finishes restoring the persisted session before redirecting.
+    if (authLoading) {
       return;
     }
+
+    // Escort unauthenticated users out safely
+    if (!user) {
+      navigate('/login', { replace: true });
+      return;
+    }
+
+    setLoading(true);
 
     const ordersColRef = collection(db, 'orders');
     // Query matching user's own UID
@@ -54,7 +60,7 @@ export default function UserDashboard() {
     });
 
     return () => unsubscribe();
-  }, [user, navigate]);
+  }, [authLoading, user, navigate]);
 
   // Total aggregator counters
   const totalOrders = orders.length;
@@ -69,6 +75,19 @@ export default function UserDashboard() {
     }
     return new Date(timestamp).toLocaleDateString();
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 bg-[#0A0A0A]">
+        <div className="flex flex-col items-center justify-center space-y-3 text-center">
+          <Loader2 className="w-8 h-8 text-[#B30000] animate-spin" />
+          <span className="text-xs text-zinc-500 font-mono uppercase tracking-wider">
+            Restoring player session...
+          </span>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) return null;
 
