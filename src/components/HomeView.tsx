@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Copy, Check, Terminal, ExternalLink } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { RankProduct, CoinProduct, BundleProduct } from '../types';
 import { formatPrice } from '../utils/price';
+import { readCache, writeCache } from '../utils/browserCache';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 
+const PINNED_ITEMS_CACHE_KEY = 'ogzz-home-pinned-items';
+const PINNED_ITEMS_CACHE_TTL_MS = 1000 * 60 * 10;
+
 export default function HomeView() {
   const [copied, setCopied] = useState(false);
-  const { settings } = useSettings();
-  const serverIP = settings.serverIP;
+  const { settings, loading } = useSettings();
+  const serverIP = loading ? '' : settings.serverIP;
   const heroTitle = (settings.heroTitle || 'OGZZ MC STORE').trim();
   const heroTitleWords = heroTitle.split(/\s+/).filter(Boolean);
   const splitIndex = heroTitleWords.length > 2 ? heroTitleWords.length - 2 : Math.ceil(heroTitleWords.length / 2);
@@ -21,16 +25,15 @@ export default function HomeView() {
     | (RankProduct & { type: 'rank' })
     | (CoinProduct & { type: 'coin' })
     | (BundleProduct & { type: 'bundle' })
-  )[]>([]);
-  const [loadingPinned, setLoadingPinned] = useState(true);
+  )[]>(() => readCache<(RankProduct & { type: 'rank' } | CoinProduct & { type: 'coin' } | BundleProduct & { type: 'bundle' })[]>(PINNED_ITEMS_CACHE_KEY) ?? []);
 
   useEffect(() => {
     const fetchPinned = async () => {
       try {
         const [ranksSnap, coinsSnap, bundlesSnap] = await Promise.all([
-          getDocs(collection(db, 'ranks')),
-          getDocs(collection(db, 'coins')),
-          getDocs(collection(db, 'bundles'))
+          getDocs(query(collection(db, 'ranks'), where('isPinned', '==', true), limit(4))),
+          getDocs(query(collection(db, 'coins'), where('isPinned', '==', true), limit(4))),
+          getDocs(query(collection(db, 'bundles'), where('isPinned', '==', true), limit(4)))
         ]);
 
         const ranksList = ranksSnap.docs.map(doc => ({
@@ -60,17 +63,21 @@ export default function HomeView() {
           .filter(b => b.isPinned)
           .map(b => ({ ...b, type: 'bundle' as const }));
 
-        setPinnedItems([...pinnedRanks, ...pinnedCoins, ...pinnedBundles]);
+        const nextPinnedItems = [...pinnedRanks, ...pinnedCoins, ...pinnedBundles];
+        setPinnedItems(nextPinnedItems);
+        writeCache(PINNED_ITEMS_CACHE_KEY, nextPinnedItems, PINNED_ITEMS_CACHE_TTL_MS);
       } catch (err) {
         console.warn("Failed to load pinned items:", err);
-      } finally {
-        setLoadingPinned(false);
       }
     };
     fetchPinned();
   }, []);
 
   const copyServerIP = () => {
+    if (!serverIP) {
+      return;
+    }
+
     navigator.clipboard.writeText(serverIP);
     setCopied(true);
     toast.success("Server IP copied! Join us now!");
@@ -128,14 +135,17 @@ export default function HomeView() {
           <div className="max-w-xl mx-auto p-2 bg-zinc-950/90 border border-[#B30000]/45 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0 pl-4 sm:pl-5 shadow-xl shadow-[#B30000]/10 hover:shadow-[0_0_25px_rgba(179,0,0,0.2)] transition-all duration-300">
             <div className="flex items-center gap-3 mt-1 sm:mt-0">
               <span className="w-3 h-3 bg-green-500 rounded-full animate-ping flex-shrink-0" />
-              <span className="font-mono text-zinc-350 text-xs sm:text-base text-left">Server IP: <strong className="text-white font-black select-all">{serverIP}</strong></span>
+              <span className="font-mono text-zinc-350 text-xs sm:text-base text-left">
+                Server IP: <strong className="text-white font-black select-all">{serverIP || 'Loading...'}</strong>
+              </span>
             </div>
             <button
               onClick={copyServerIP}
+              disabled={!serverIP}
               className="w-full sm:w-auto flex items-center justify-center gap-2 py-3 sm:py-3.5 px-6 bg-[#B30000] hover:bg-[#D60000] text-white text-xs sm:text-sm font-mono font-black rounded-xl transition-all uppercase shadow-[0_0_15px_rgba(179,0,0,0.3)] hover:shadow-[0_0_25px_rgba(214,0,0,0.6)] cursor-pointer"
             >
               {copied ? <Check className="w-4 h-4 animate-pulse" /> : <Copy className="w-4 h-4" />}
-              {copied ? "Copied!" : "Copy IP"}
+              {loading ? "Loading..." : copied ? "Copied!" : "Copy IP"}
             </button>
           </div>
 
@@ -211,6 +221,8 @@ export default function HomeView() {
                       referrerPolicy="no-referrer"
                       src={item.imageUrl}
                       alt={`${item.name} featured ${item.type} package artwork for the OGzz MC Minecraft Store`}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-56 object-cover group-hover:scale-102 transition-transform duration-500 opacity-85"
                     />
                     <div className="p-8 space-y-4 flex-1 flex flex-col justify-between">

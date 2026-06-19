@@ -4,13 +4,17 @@ import { db } from '../firebase/firebase';
 import { DEFAULT_COINS } from '../data/defaultProducts';
 import { CoinProduct } from '../types';
 import { formatPrice } from '../utils/price';
+import { readCache, writeCache } from '../utils/browserCache';
 import OrderModal from './OrderModal';
 import { Coins as CoinsIcon, ShoppingBag, PlusCircle, Eye, Sparkles, X, ShieldAlert } from 'lucide-react';
 import { useSettings } from '../context/SettingsContext';
 
+const COINS_CACHE_KEY = 'ogzz-coins';
+const COINS_CACHE_TTL_MS = 1000 * 60 * 10;
+
 export default function Coins() {
-  const [coinsList, setCoinsList] = useState<CoinProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [coinsList, setCoinsList] = useState<CoinProduct[]>(() => readCache<CoinProduct[]>(COINS_CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => readCache<CoinProduct[]>(COINS_CACHE_KEY) === null);
   const { settings } = useSettings();
 
   // States for checkout modal
@@ -30,20 +34,25 @@ export default function Coins() {
             ...doc.data()
           })) as CoinProduct[];
           setCoinsList(fetchedList);
+          writeCache(COINS_CACHE_KEY, fetchedList, COINS_CACHE_TTL_MS);
         } else {
           // Fallback to pre-designed coins packs only if catalog is not initialized
           if (settings.catalogInitialized) {
             setCoinsList([]);
+            writeCache(COINS_CACHE_KEY, [], COINS_CACHE_TTL_MS);
           } else {
             setCoinsList(DEFAULT_COINS);
+            writeCache(COINS_CACHE_KEY, DEFAULT_COINS, COINS_CACHE_TTL_MS);
           }
         }
       } catch (error) {
         console.warn("Could not load coins from Firestore. Falling back to default packs.", error);
         if (settings.catalogInitialized) {
           setCoinsList([]);
+          writeCache(COINS_CACHE_KEY, [], COINS_CACHE_TTL_MS);
         } else {
           setCoinsList(DEFAULT_COINS);
+          writeCache(COINS_CACHE_KEY, DEFAULT_COINS, COINS_CACHE_TTL_MS);
         }
       } finally {
         setLoading(false);
@@ -142,6 +151,8 @@ export default function Coins() {
                 <img
                   src={coin.imageUrl}
                   alt={`${coin.name} virtual coin pack artwork for the OGzz MC Minecraft Store`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-60"
                 />
                 

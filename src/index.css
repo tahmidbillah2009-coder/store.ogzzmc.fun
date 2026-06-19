@@ -121,6 +121,26 @@
   will-change: transform, opacity;
 }
 
+@media (max-width: 768px) {
+  .ambient-pulse-red,
+  .ambient-pulse-gold {
+    animation: none;
+    will-change: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-pulse-red,
+  .ambient-pulse-gold {
+    animation: none;
+    will-change: auto;
+  }
+
+  .shine-overlay::before {
+    transition: none;
+  }
+}
+
 /* Glowing scrollbar for Minecraft theme */
 .antracite-scrollbar::-webkit-scrollbar {
   width: 6px;

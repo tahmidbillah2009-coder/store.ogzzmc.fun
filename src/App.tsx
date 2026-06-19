@@ -1,20 +1,22 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
-import HomeView from './components/HomeView';
-import Ranks from './components/Ranks';
-import Coins from './components/Coins';
-import Bundles from './components/Bundles';
-import OrderTracker from './components/OrderTracker';
-import Login from './components/Login';
-import Register from './components/Register';
-import UserDashboard from './components/UserDashboard';
-import AdminDashboard from './components/AdminDashboard';
-import TermsConditions from './components/TermsConditions';
 import Seo from './components/Seo';
 import SiteLayout from './components/SiteLayout';
 import { getSeoForPath, normalizePathname } from './site/seo';
 import { ShieldQuestion, Home } from 'lucide-react';
+
+const HomeView = lazy(() => import('./components/HomeView'));
+const Ranks = lazy(() => import('./components/Ranks'));
+const Coins = lazy(() => import('./components/Coins'));
+const Bundles = lazy(() => import('./components/Bundles'));
+const OrderTracker = lazy(() => import('./components/OrderTracker'));
+const Login = lazy(() => import('./components/Login'));
+const Register = lazy(() => import('./components/Register'));
+const UserDashboard = lazy(() => import('./components/UserDashboard'));
+const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
+const TermsConditions = lazy(() => import('./components/TermsConditions'));
 
 export default function App() {
   return (
@@ -32,26 +34,28 @@ function AppShell() {
   return (
     <SiteLayout>
       <RouteSeo />
-      <Routes>
-        <Route path="/" element={<HomeView />} />
-        <Route path="/ranks" element={<Ranks />} />
-        <Route path="/coins" element={<Coins />} />
-        <Route path="/bundles" element={<Bundles />} />
-        <Route path="/order-tracker" element={<OrderTracker />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<UserDashboard />} />
-        <Route path="/terms" element={<TermsConditions />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<HomeView />} />
+          <Route path="/ranks" element={<Ranks />} />
+          <Route path="/coins" element={<Coins />} />
+          <Route path="/bundles" element={<Bundles />} />
+          <Route path="/order-tracker" element={<OrderTracker />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/terms" element={<TermsConditions />} />
 
-        {/* Supporting all Admin Tabs routes natively inside our responsive Console layout */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/orders" element={<AdminDashboard />} />
-        <Route path="/admin/ranks" element={<AdminDashboard />} />
-        <Route path="/admin/coins" element={<AdminDashboard />} />
+          {/* Supporting all Admin Tabs routes natively inside our responsive Console layout */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/orders" element={<AdminDashboard />} />
+          <Route path="/admin/ranks" element={<AdminDashboard />} />
+          <Route path="/admin/coins" element={<AdminDashboard />} />
 
-        {/* 404 fallback page */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+          {/* 404 fallback page */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </SiteLayout>
   );
 }
@@ -93,6 +97,16 @@ function NotFound() {
         <Home className="w-3.5 h-3.5" />
         Return to Spawn
       </a>
+    </div>
+  );
+}
+
+function PageLoader() {
+  return (
+    <div className="min-h-[50vh] flex items-center justify-center px-6">
+      <div className="rounded-xl border border-[#B30000]/30 bg-[#0C0C0C] px-5 py-3 text-sm font-mono uppercase tracking-wider text-zinc-300">
+        Loading page...
+      </div>
     </div>
   );
 }

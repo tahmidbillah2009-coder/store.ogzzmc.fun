@@ -17,6 +17,25 @@ export default defineConfig(() => {
           orderTracker: path.resolve(__dirname, 'order-tracker/index.html'),
           terms: path.resolve(__dirname, 'terms/index.html'),
         },
+        output: {
+          manualChunks(id) {
+            if (!id.includes('node_modules')) {
+              return;
+            }
+
+            if (id.includes('firebase')) {
+              return 'vendor-firebase';
+            }
+
+            if (id.includes('react') || id.includes('scheduler')) {
+              return 'vendor-react';
+            }
+
+            if (id.includes('motion') || id.includes('lucide-react') || id.includes('react-hot-toast')) {
+              return 'vendor-ui';
+            }
+          },
+        },
       },
     },
     resolve: {

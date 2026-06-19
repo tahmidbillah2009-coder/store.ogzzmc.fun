@@ -4,14 +4,18 @@ import { db } from '../firebase/firebase';
 import { DEFAULT_BUNDLES } from '../data/defaultProducts';
 import { BundleProduct } from '../types';
 import { formatPrice } from '../utils/price';
+import { readCache, writeCache } from '../utils/browserCache';
 import OrderModal from './OrderModal';
 import { ShieldCheck, Sparkles, Coins, ShoppingCart, HelpCircle, ArrowRight, Star, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 
+const BUNDLES_CACHE_KEY = 'ogzz-bundles';
+const BUNDLES_CACHE_TTL_MS = 1000 * 60 * 10;
+
 export default function Bundles() {
-  const [bundles, setBundles] = useState<BundleProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [bundles, setBundles] = useState<BundleProduct[]>(() => readCache<BundleProduct[]>(BUNDLES_CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => readCache<BundleProduct[]>(BUNDLES_CACHE_KEY) === null);
   const { settings } = useSettings();
 
   // States for checkout modal
@@ -28,20 +32,25 @@ export default function Bundles() {
             ...doc.data()
           })) as BundleProduct[];
           setBundles(list);
+          writeCache(BUNDLES_CACHE_KEY, list, BUNDLES_CACHE_TTL_MS);
         } else {
           // If Firestore "bundles" is empty, utilize default mockup products only if catalog is not initialized
           if (settings.catalogInitialized) {
             setBundles([]);
+            writeCache(BUNDLES_CACHE_KEY, [], BUNDLES_CACHE_TTL_MS);
           } else {
             setBundles(DEFAULT_BUNDLES);
+            writeCache(BUNDLES_CACHE_KEY, DEFAULT_BUNDLES, BUNDLES_CACHE_TTL_MS);
           }
         }
       } catch (error) {
         console.warn("Could not load bundles from Firestore. Using offline fallbacks.", error);
         if (settings.catalogInitialized) {
           setBundles([]);
+          writeCache(BUNDLES_CACHE_KEY, [], BUNDLES_CACHE_TTL_MS);
         } else {
           setBundles(DEFAULT_BUNDLES);
+          writeCache(BUNDLES_CACHE_KEY, DEFAULT_BUNDLES, BUNDLES_CACHE_TTL_MS);
         }
       } finally {
         setLoading(false);
@@ -179,6 +188,8 @@ export default function Bundles() {
                   <img
                     src={bundle.imageUrl}
                     alt={`${bundle.name} bundle artwork for the OGzz MC Minecraft Store`}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-60"
                   />
                   

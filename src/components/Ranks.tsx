@@ -4,14 +4,18 @@ import { db } from '../firebase/firebase';
 import { DEFAULT_RANKS } from '../data/defaultProducts';
 import { RankProduct } from '../types';
 import { formatPrice } from '../utils/price';
+import { readCache, writeCache } from '../utils/browserCache';
 import OrderModal from './OrderModal';
 import { Eye, ShieldAlert, Sparkles, ShoppingCart, HelpCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 
+const RANKS_CACHE_KEY = 'ogzz-ranks';
+const RANKS_CACHE_TTL_MS = 1000 * 60 * 10;
+
 export default function Ranks() {
-  const [ranks, setRanks] = useState<RankProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [ranks, setRanks] = useState<RankProduct[]>(() => readCache<RankProduct[]>(RANKS_CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => readCache<RankProduct[]>(RANKS_CACHE_KEY) === null);
   const { settings } = useSettings();
   
   // States for checkout modal
@@ -31,20 +35,25 @@ export default function Ranks() {
             ...doc.data()
           })) as RankProduct[];
           setRanks(ranksList);
+          writeCache(RANKS_CACHE_KEY, ranksList, RANKS_CACHE_TTL_MS);
         } else {
           // If Firestore "ranks" is empty, utilize default mockup products only if catalog is not initialized
           if (settings.catalogInitialized) {
             setRanks([]);
+            writeCache(RANKS_CACHE_KEY, [], RANKS_CACHE_TTL_MS);
           } else {
             setRanks(DEFAULT_RANKS);
+            writeCache(RANKS_CACHE_KEY, DEFAULT_RANKS, RANKS_CACHE_TTL_MS);
           }
         }
       } catch (error) {
         console.warn("Failed fetching ranks from Firestore. Utilizing offline fallbacks.", error);
         if (settings.catalogInitialized) {
           setRanks([]);
+          writeCache(RANKS_CACHE_KEY, [], RANKS_CACHE_TTL_MS);
         } else {
           setRanks(DEFAULT_RANKS);
+          writeCache(RANKS_CACHE_KEY, DEFAULT_RANKS, RANKS_CACHE_TTL_MS);
         }
       } finally {
         setLoading(false);
@@ -139,6 +148,8 @@ export default function Ranks() {
                 <img
                   src={rank.imageUrl}
                   alt={`${rank.name} rank artwork for the OGzz MC Minecraft Server`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-70"
                 />
                 

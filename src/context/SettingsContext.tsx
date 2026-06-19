@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../firebase/firebase';
+import { readCache, writeCache } from '../utils/browserCache';
 
 export interface SiteSettings {
   serverIP: string;
@@ -53,6 +54,9 @@ const DEFAULT_SETTINGS: SiteSettings = {
   termsAndConditions: DEFAULT_TERMS,
 };
 
+const SETTINGS_CACHE_KEY = 'ogzz-site-settings';
+const SETTINGS_CACHE_TTL_MS = 1000 * 60 * 60 * 24;
+
 function normalizeSettings(settings: SiteSettings): SiteSettings {
   return {
     ...DEFAULT_SETTINGS,
@@ -69,7 +73,10 @@ function normalizeSettings(settings: SiteSettings): SiteSettings {
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<SiteSettings>(() => {
+    const cachedSettings = readCache<SiteSettings>(SETTINGS_CACHE_KEY);
+    return cachedSettings ? normalizeSettings(cachedSettings) : DEFAULT_SETTINGS;
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -79,16 +86,20 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
       docRef,
       (snapshot) => {
         if (snapshot.exists()) {
-          setSettings(normalizeSettings(snapshot.data() as SiteSettings));
+          const normalizedSettings = normalizeSettings(snapshot.data() as SiteSettings);
+          setSettings(normalizedSettings);
+          writeCache(SETTINGS_CACHE_KEY, normalizedSettings, SETTINGS_CACHE_TTL_MS);
         } else {
           setSettings(DEFAULT_SETTINGS);
+          writeCache(SETTINGS_CACHE_KEY, DEFAULT_SETTINGS, SETTINGS_CACHE_TTL_MS);
         }
         setLoading(false);
       },
       (error) => {
         // Guard against unauthorized reads or bootstrap setup missing
         console.warn("Could not fetch site settings, using default configuration.", error);
-        setSettings(DEFAULT_SETTINGS);
+        const cachedSettings = readCache<SiteSettings>(SETTINGS_CACHE_KEY);
+        setSettings(cachedSettings ? normalizeSettings(cachedSettings) : DEFAULT_SETTINGS);
         setLoading(false);
       }
     );
@@ -100,7 +111,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const path = 'settings/site';
     try {
       const docRef = doc(db, 'settings', 'site');
-      await setDoc(docRef, {
+      const normalizedSettings = normalizeSettings({
         serverIP: newSettings.serverIP.trim(),
         discordLink: newSettings.discordLink.trim(),
         backgroundImage: newSettings.backgroundImage ? newSettings.backgroundImage.trim() : '',
@@ -114,7 +125,10 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
           ? !!newSettings.catalogInitialized
           : !!settings.catalogInitialized,
         termsAndConditions: newSettings.termsAndConditions ? newSettings.termsAndConditions.trim() : DEFAULT_TERMS,
-      }, { merge: true });
+      });
+
+      await setDoc(docRef, normalizedSettings, { merge: true });
+      writeCache(SETTINGS_CACHE_KEY, normalizedSettings, SETTINGS_CACHE_TTL_MS);
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, path);
     }
