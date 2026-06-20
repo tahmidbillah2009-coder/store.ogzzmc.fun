@@ -91,7 +91,7 @@ export default function Ranks() {
               className="flex flex-col bg-[#0C0C0C] border border-zinc-900/60 rounded-2xl overflow-hidden shadow-xl animate-pulse"
             >
               {/* Product Badge Image Skeleton */}
-              <div className="relative h-64 bg-zinc-950 flex items-center justify-center">
+              <div className="relative aspect-video bg-zinc-950 flex items-center justify-center">
                 <div className="w-16 h-16 rounded-full bg-zinc-900/40 flex items-center justify-center">
                   <Sparkles className="w-8 h-8 text-zinc-800" />
                 </div>
@@ -101,21 +101,11 @@ export default function Ranks() {
 
               {/* Card Meta Content Skeleton */}
               <div className="p-8 flex-1 flex flex-col justify-between space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    {/* Name block loader */}
-                    <div className="h-7 bg-zinc-900 rounded-md w-1/3" />
-                    {/* Preview button loader */}
-                    <div className="h-7 bg-zinc-900/80 rounded-md w-16" />
-                  </div>
-
-                  {/* Bullet description paragraph loaders */}
-                  <div className="space-y-2.5 pt-1">
-                    <div className="h-3.5 bg-zinc-900/70 rounded w-11/12" />
-                    <div className="h-3.5 bg-zinc-900/70 rounded w-4/5" />
-                    <div className="h-3.5 bg-zinc-900/70 rounded w-5/6" />
-                    <div className="h-3.5 bg-[#0C0C0C] rounded w-2/3" />
-                  </div>
+                <div className="flex justify-between items-center">
+                  {/* Name block loader */}
+                  <div className="h-7 bg-zinc-900 rounded-md w-1/3" />
+                  {/* Preview button loader */}
+                  <div className="h-7 bg-zinc-900/80 rounded-md w-16" />
                 </div>
 
                 {/* Purchase Button Loader */}
@@ -144,13 +134,13 @@ export default function Ranks() {
             >
               
               {/* Product Badge background */}
-              <div className="relative h-64 overflow-hidden bg-zinc-950">
+              <div className="relative aspect-video overflow-hidden bg-zinc-950">
                 <img
                   src={rank.imageUrl}
                   alt={`${rank.name} rank artwork for the OGzz MC Minecraft Server`}
                   loading="lazy"
                   decoding="async"
-                  className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500 opacity-70"
+                  className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-500 opacity-70"
                 />
                 
                 {/* Visual Glassmorphic gradient prefix over image */}
@@ -164,25 +154,18 @@ export default function Ranks() {
 
               {/* Product Meta details */}
               <div className="p-8 flex-1 flex flex-col justify-between space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <h3 className="text-2xl font-black text-white uppercase tracking-wide group-hover:text-[#FF5E5E] transition-colors font-sans">
-                      {rank.name}
-                    </h3>
-                    <button
-                      onClick={() => setPreviewRank(rank)}
-                      className="p-1.5 px-3 bg-zinc-900 hover:bg-[#B30000]/10 border border-zinc-800 hover:border-[#B30000]/45 text-gray-300 hover:text-white rounded-lg flex items-center gap-1.5 text-xs font-mono transition-all cursor-pointer"
-                      title="Preview Perks Screenshot"
-                    >
-                      <Eye className="w-4 h-4" />
-                      Preview
-                    </button>
-                  </div>
-
-                  {/* Description points renderer */}
-                  <div className="space-y-2 text-zinc-350 text-sm sm:text-base font-sans whitespace-pre-line leading-relaxed">
-                    {rank.description}
-                  </div>
+                <div className="flex justify-between items-center gap-4">
+                  <h3 className="text-2xl font-black text-white uppercase tracking-wide group-hover:text-[#FF5E5E] transition-colors font-sans">
+                    {rank.name}
+                  </h3>
+                  <button
+                    onClick={() => setPreviewRank(rank)}
+                    className="p-1.5 px-3 bg-zinc-900 hover:bg-[#B30000]/10 border border-zinc-800 hover:border-[#B30000]/45 text-gray-300 hover:text-white rounded-lg flex items-center gap-1.5 text-xs font-mono transition-all cursor-pointer"
+                    title="Preview Perks Screenshot"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Preview
+                  </button>
                 </div>
 
                 {/* Purchase Button */}

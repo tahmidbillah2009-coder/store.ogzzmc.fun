@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Sparkles, Copy, Check, Terminal, ExternalLink } from 'lucide-react';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
+import { Link } from 'react-router-dom';
 import { db } from '../firebase/firebase';
 import { RankProduct, CoinProduct, BundleProduct } from '../types';
 import { formatPrice } from '../utils/price';
@@ -117,7 +118,7 @@ export default function HomeView() {
 
           <h1 className="flex flex-col items-center gap-1 md:gap-2 text-center select-none leading-[0.9] tracking-[-0.04em] font-black font-sans">
             <span className="sr-only">OGzz MC Minecraft Server Store</span>
-            <span aria-hidden="true" className="text-white text-5xl md:text-7xl lg:text-8xl drop-shadow-[0_2px_18px_rgba(255,255,255,0.2)]">
+            <span aria-hidden="true" className="text-white text-5xl md:text-7xl lg:text-8xl drop-shadow-[0_2px_18px_rgba(255,255,255,0.2)] float-slow">
               {heroTitleTop}
             </span>
             {heroTitleBottom ? (
@@ -168,20 +169,20 @@ export default function HomeView() {
 
           {/* CTA Button Actions */}
           <div className="flex flex-col sm:flex-row justify-center items-stretch sm:items-center gap-4 sm:gap-5 pt-4 max-w-sm sm:max-w-none mx-auto">
-            <a
+            <Link
               id="home-view-ranks-cta"
-              href="/ranks"
+              to="/ranks"
               className="px-8 py-4 sm:px-10 sm:py-5 bg-[#B30000] hover:bg-[#D60000] text-white font-black rounded-xl font-mono text-base tracking-wider uppercase transition-all shadow-[0_0_30px_rgba(179,0,0,0.6)] hover:shadow-[0_0_40px_rgba(214,0,0,0.9)] border border-[#B30000] text-center shine-overlay"
             >
               Explore VIP Ranks
-            </a>
-            <a
+            </Link>
+            <Link
               id="home-view-coins-cta"
-              href="/coins"
+              to="/coins"
               className="px-8 py-4 sm:px-10 sm:py-5 bg-zinc-950 hover:bg-zinc-900 text-gray-250 hover:text-white font-black rounded-xl font-mono text-base tracking-wider uppercase transition-all border border-zinc-800 hover:border-zinc-700 shadow-md text-center shine-overlay"
             >
               Shop Coins
-            </a>
+            </Link>
           </div>
         </section>
       </div>
@@ -236,12 +237,12 @@ export default function HomeView() {
                         <span className="text-base font-mono text-[#FF3E3E] font-black glow-text-red">
                           {formatPrice(item.price, item.priceRS)}
                         </span>
-                        <a
-                          href={linkTo}
+                        <Link
+                          to={linkTo}
                           className="px-6 py-2.5 bg-[#B30000]/10 hover:bg-[#B30000] border border-[#B30000]/40 rounded-lg text-white text-xs sm:text-sm font-mono uppercase font-bold tracking-wider transition-all shadow-[0_0_10px_rgba(179,0,0,0.1)] hover:shadow-[0_0_15px_rgba(179,0,0,0.4)]"
                         >
                           {buttonText}
-                        </a>
+                        </Link>
                       </div>
                     </div>
                   </div>

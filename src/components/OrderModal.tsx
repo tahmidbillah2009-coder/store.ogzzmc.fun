@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle, Gift, ArrowRight, MessageSquare, ExternalLink, Copy, Check, Loader2, Lock, Maximize2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { formatPrice } from '../utils/price';
 import { db, handleFirestoreError, OperationType } from '../firebase/firebase';
@@ -321,15 +322,15 @@ export default function OrderModal({ product, productType, isOpen, onClose }: Or
                   />
                   <div className="text-xs leading-relaxed text-zinc-400 font-sans text-left">
                     I have read and agree to the{" "}
-                    <a 
-                      href="/terms" 
+                    <Link 
+                      to="/terms" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="text-[#FF3E3E] hover:text-[#D60000] font-bold underline inline-flex items-center gap-0.5"
                     >
                       Terms & Conditions
                       <ExternalLink className="w-3 h-3 inline pb-0.5" />
-                    </a>{" "}
+                    </Link>{" "}
                     of the OGzz MC Store. All sales are final.
                   </div>
                 </div>

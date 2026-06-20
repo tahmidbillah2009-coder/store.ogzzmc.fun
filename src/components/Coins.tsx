@@ -83,14 +83,14 @@ export default function Coins() {
 
       {loading ? (
         /* Immersive gold coins grid matching real coins grid layout */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
               className="flex flex-col justify-between bg-[#0C0C0C] border border-zinc-900 rounded-xl overflow-hidden shadow-xl animate-pulse"
             >
               {/* Image banner placeholder */}
-              <div className="relative h-44 bg-zinc-950 flex items-center justify-center">
+              <div className="relative h-56 bg-zinc-950 flex items-center justify-center">
                 <CoinsIcon className="w-10 h-10 text-zinc-800" />
                 {/* Floating Coins Indicator Loader */}
                 <div className="absolute top-3 left-3 h-6 w-24 bg-zinc-900 rounded border border-zinc-850" />
@@ -139,7 +139,7 @@ export default function Coins() {
         </div>
       ) : (
         /* Render coins */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
           {coinsList.map((coin) => (
             <div
               key={coin.id || coin.name}
@@ -147,7 +147,7 @@ export default function Coins() {
             >
               
               {/* Image banner */}
-              <div className="relative h-52 bg-zinc-950 overflow-hidden">
+              <div className="relative h-64 bg-zinc-950 overflow-hidden">
                 <img
                   src={coin.imageUrl}
                   alt={`${coin.name} virtual coin pack artwork for the OGzz MC Minecraft Store`}
@@ -164,10 +164,10 @@ export default function Coins() {
               </div>
 
               {/* Product Info */}
-              <div className="p-6.5 flex-1 flex flex-col justify-between space-y-5">
+              <div className="p-8 flex-1 flex flex-col justify-between space-y-6">
                 <div className="space-y-3">
                   <div className="flex justify-between items-start gap-2">
-                    <h3 className="text-base font-black text-white uppercase group-hover:text-[#FF5E5E] transition-colors leading-tight font-sans">
+                    <h3 className="text-lg sm:text-xl font-black text-white uppercase group-hover:text-[#FF5E5E] transition-colors leading-tight font-sans">
                       {coin.name}
                     </h3>
                     <button
@@ -179,7 +179,7 @@ export default function Coins() {
                       Preview
                     </button>
                   </div>
-                  <p className="text-zinc-400 text-xs sm:text-sm leading-relaxed font-sans line-clamp-3">
+                  <p className="text-zinc-400 text-sm sm:text-base leading-relaxed font-sans line-clamp-3">
                     {coin.description}
                   </p>
                 </div>
@@ -196,7 +196,7 @@ export default function Coins() {
                   {/* Buy Button hook */}
                   <button
                     onClick={() => handleBuyClick(coin)}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-zinc-950 hover:bg-gradient-to-r hover:from-[#B30000] hover:to-[#D60000] text-gray-305 hover:text-white border border-zinc-900 hover:border-[#B30000] font-sans text-xs sm:text-sm font-black uppercase rounded-lg transition-all shadow-md hover:shadow-[0_0_15px_rgba(179,0,0,0.4)] font-mono cursor-pointer"
+                    className="w-full flex items-center justify-center gap-2 py-4 bg-zinc-950 hover:bg-gradient-to-r hover:from-[#B30000] hover:to-[#D60000] text-gray-305 hover:text-white border border-zinc-900 hover:border-[#B30000] font-sans text-sm sm:text-base font-black uppercase rounded-lg transition-all shadow-md hover:shadow-[0_0_15px_rgba(179,0,0,0.4)] font-mono cursor-pointer"
                   >
                     <ShoppingBag className="w-4 h-4" />
                     Buy Coins

@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Link } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import Seo from './components/Seo';
@@ -90,13 +90,13 @@ function NotFound() {
           You've wandered off the biome! The folder path on OGzz MC doesn't exist.
         </p>
       </div>
-      <a
-        href="/"
+      <Link
+        to="/"
         className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#B30000] hover:bg-[#D60000] text-white text-xs font-mono font-bold rounded uppercase transition-colors"
       >
         <Home className="w-3.5 h-3.5" />
         Return to Spawn
-      </a>
+      </Link>
     </div>
   );
 }
