@@ -123,7 +123,7 @@ export default function Footer() {
             </div>
           </div>
           <div className="pt-3 text-center">
-            <p className="text-zinc-600 text-[11px]">Built by <span className="text-[#B30000] font-mono font-bold">Void_AXE_</span></p>
+            <p className="text-zinc-600 text-[11px]">Developed by <span className="text-[#B30000] font-mono font-bold">Void_AXE_</span></p>
           </div>
         </div>
       </div>
