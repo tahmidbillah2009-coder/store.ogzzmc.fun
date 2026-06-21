@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, Copy, Check, Terminal, ExternalLink } from 'lucide-react';
+import { Sparkles, Copy, Check, Terminal, ExternalLink, ArrowRight, Rocket, Leaf } from 'lucide-react';
 import { collection, getDocs, limit, query, where } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { db } from '../firebase/firebase';
@@ -85,6 +85,31 @@ export default function HomeView() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Helper to render description/perk lines with highlighted amounts and special styling
+  const renderPerkLine = (rawLine: string, idx: number) => {
+    const text = rawLine.replace(/^[•\-\*\s]+/, '').trim();
+    const isGuarantee = /guarante|guaranteed|best checkout|price combo discount/i.test(text);
+    const currencyRe = /(\d[\d,\.]*\s*(?:coins|Coins|Rs\.?|RS|USD))/i;
+    const parts = text.split(currencyRe).filter(Boolean);
+
+    return (
+      <li key={idx} className="flex items-start gap-3">
+        <div className={`mt-0.5 p-1 rounded ${isGuarantee ? 'bg-emerald-900 border border-emerald-700 text-emerald-400' : 'bg-[#0B0B0B] border border-zinc-900/60 text-[#FF5E5E]'} flex items-center justify-center`}>
+          {isGuarantee ? <Check className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+        </div>
+        <div className="text-sm text-zinc-300 leading-tight">
+          {parts.map((part, i) => (
+            currencyRe.test(part) ? (
+              <span key={i} className="font-mono font-bold text-white">{part}</span>
+            ) : (
+              <span key={i}>{part}</span>
+            )
+          ))}
+        </div>
+      </li>
+    );
+  };
+
   return (
     <div className="space-y-20 pb-20 overflow-hidden bg-[#0A0A0A]">
       
@@ -164,6 +189,24 @@ export default function HomeView() {
                   Our checkout valve is locked for maintenance by owner <strong className="text-zinc-200">yoorasher@gmail.com</strong>. Suspended shopping carts will resume shortly.
                 </p>
               </div>
+                        {/* Compact "What's Inside" perks preview for featured items */}
+                        <div className="mt-3">
+                          <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">WHAT'S INSIDE</div>
+                          <div className="space-y-2">
+                            {((item as any).perks?.length ? (item as any).perks : (item.description || '').split('\n').map((l:string)=>l.replace(/^[•\-\*\s]+/, '').trim()).filter(Boolean).slice(0,3)).map((perk: any, idx: number) => {
+                              const text = typeof perk === 'string' ? perk : perk.text || '';
+                              const Icon = idx === 0 ? ArrowRight : idx === 1 ? Rocket : Leaf;
+                              return (
+                                <div key={idx} className="flex items-start gap-3">
+                                  <div className="mt-0.5 p-1 rounded bg-[#0B0B0B] border border-zinc-900/60 text-[#FF5E5E] flex items-center justify-center">
+                                    <Icon className="w-4 h-4" />
+                                  </div>
+                                  <div className="text-sm text-zinc-300 leading-tight">{text}</div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
             </div>
           )}
 
@@ -229,9 +272,14 @@ export default function HomeView() {
                     <div className="p-8 space-y-4 flex-1 flex flex-col justify-between">
                       <div className="space-y-2">
                         <h4 className="text-2xl font-bold text-white group-hover:text-[#FF5E5E] transition-colors uppercase font-sans tracking-wide">{item.name}</h4>
-                        <p className="text-zinc-400 text-sm line-clamp-4 leading-relaxed">
-                          {item.description}
-                        </p>
+                        <div className="text-zinc-400 text-sm leading-relaxed">
+                          <ul className="space-y-2">
+                            {(((item as any).perks?.length ? (item as any).perks : (item.description || '').split('\n'))
+                              .map((l:string) => l.replace(/^[•\-\*\s]+/, '').trim())
+                              .filter(Boolean)
+                              .slice(0,4)).map((line:string, idx:number) => renderPerkLine(line, idx))}
+                          </ul>
+                        </div>
                       </div>
                       <div className="flex items-center justify-between pt-6 border-t border-zinc-900/40">
                         <span className="text-base font-mono text-[#FF3E3E] font-black glow-text-red">

@@ -6,7 +6,7 @@ import { RankProduct } from '../types';
 import { formatPrice } from '../utils/price';
 import { readCache, writeCache } from '../utils/browserCache';
 import OrderModal from './OrderModal';
-import { Eye, ShieldAlert, Sparkles, ShoppingCart, HelpCircle } from 'lucide-react';
+import { Eye, ShieldAlert, Sparkles, ShoppingCart, HelpCircle, ArrowRight, Rocket, Leaf } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useSettings } from '../context/SettingsContext';
 
@@ -166,6 +166,26 @@ export default function Ranks() {
                     <Eye className="w-4 h-4" />
                     Preview
                   </button>
+                </div>
+
+                {/* "What's Inside" concise perks preview */}
+                <div className="mt-4">
+                  <div className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider mb-2">WHAT'S INSIDE</div>
+                  <div className="space-y-2">
+                    {(rank.perks?.length ? rank.perks : rank.description?.split('\n').map(l => l.replace(/^[•\-\*\s]+/, '').trim()).filter(Boolean).slice(0,3)).map((perk: any, idx: number) => {
+                      const text = typeof perk === 'string' ? perk : perk.text || '';
+                      // pick an icon based on keywords or index
+                      const Icon = idx === 0 ? ArrowRight : idx === 1 ? Rocket : Leaf;
+                      return (
+                        <div key={idx} className="flex items-start gap-3">
+                          <div className="mt-0.5 p-1 rounded bg-[#0B0B0B] border border-zinc-900/60 text-[#FF5E5E] flex items-center justify-center">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div className="text-sm text-zinc-300 leading-tight">{text}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Purchase Button */}
